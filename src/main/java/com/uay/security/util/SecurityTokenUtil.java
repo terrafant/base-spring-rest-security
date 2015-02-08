@@ -1,7 +1,7 @@
 package com.uay.security.util;
 
+import com.uay.security.entity.SecurityToken;
 import org.springframework.security.crypto.codec.Base64;
-import org.springframework.util.StringUtils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -65,33 +65,5 @@ public class SecurityTokenUtil {
 
     public static boolean isTokenExpired(long tokenExpiryTime) {
         return tokenExpiryTime < System.currentTimeMillis();
-    }
-
-    public static class SecurityToken {
-        private String username;
-        private long expirationDate;
-        private String signature;
-
-        public SecurityToken(String token) {
-            String tokenAsPlainText = new String(Base64.decode(token.getBytes()));
-            String[] decodedToken = StringUtils.delimitedListToStringArray(tokenAsPlainText, DELIMITER);
-            if (decodedToken.length == 3) {
-                this.username = decodedToken[0];
-                this.expirationDate = Long.parseLong(decodedToken[1]);
-                this.signature = decodedToken[2];
-            }
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public long getExpirationDate() {
-            return expirationDate;
-        }
-
-        public String getSignature() {
-            return signature;
-        }
     }
 }

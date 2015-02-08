@@ -42,7 +42,6 @@
         <beans:property name="location" value="classpath:security.properties"/>
     </beans:bean>
 
-
     <authentication-manager alias="authenticationManager" erase-credentials="false">
         <authentication-provider>
             <user-service id="inMemoryUserDetailsService">

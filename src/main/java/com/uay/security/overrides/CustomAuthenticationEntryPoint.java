@@ -20,7 +20,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         response.setContentType(Versions.V1_0);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         PrintWriter out = response.getWriter();
-        out.print("{\"message\":\"Full authentication is required to access this resource.\", \"access-denied\":true,\"cause\":\"NOT AUTHENTICATED\"}");
+        out.print("{\"message\":\"Full authentication is required to access this resource\", \"access-denied\":true,\"cause\":\"NOT AUTHENTICATED\"}");
         out.flush();
         out.close();
     }

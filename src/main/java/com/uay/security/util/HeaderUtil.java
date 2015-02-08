@@ -1,8 +1,8 @@
 package com.uay.security.util;
 
 
+import com.uay.security.entity.SecurityToken;
 import com.uay.security.service.UserDetailsManager;
-import com.uay.security.util.SecurityTokenUtil.SecurityToken;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.security.GeneralSecurityException;
@@ -33,27 +32,19 @@ public class HeaderUtil {
     @Autowired
     private UserDetailsManager userDetailsManager;
 
-    @PostConstruct
-    private void init() {
+    public String getTokenHeader(HttpServletRequest request) {
+        return request.getHeader(HEADER_NAME);
     }
 
-    public String getUserName(HttpServletRequest request) {
-        String header = request.getHeader(HEADER_NAME);
-        return StringUtils.isNotBlank(header) ? extractUserName(header) : null;
-    }
-
-    private String extractUserName(String value) {
-        SecurityToken securityToken = SecurityTokenUtil.decodeToken(value);
-        if (!SecurityTokenUtil.isTokenExpired(securityToken.getExpirationDate())) {
-            return securityToken.getUsername();
-        }
-        return null;
+    public SecurityToken getSecurityToken(HttpServletRequest request) {
+        String header = getTokenHeader(request);
+        return StringUtils.isNotBlank(header) ? SecurityTokenUtil.decodeToken(header) : null;
     }
 
     public void addHeader(HttpServletResponse response, Authentication authentication) {
         try {
-            String encryptedValue = createAuthToken(authentication);
-            response.setHeader(HEADER_NAME, encryptedValue);
+            String authToken = createAuthToken(authentication);
+            response.setHeader(HEADER_NAME, authToken);
         } catch (GeneralSecurityException e) {
             logger.error("Unable to encrypt header", e);
         }

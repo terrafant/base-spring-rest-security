@@ -4,7 +4,6 @@ import com.uay.common.Versions;
 import com.uay.security.service.SessionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.AbstractAuthenticationTargetUrlRequestHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -27,7 +26,7 @@ public class CustomUrlLogoutSuccessHandler extends AbstractAuthenticationTargetU
         String resultMessage;
         if (authentication != null) {
             sessionManager.removeSession(authentication);
-            resultMessage = "{\"message\":\"Successfully logged out.\"}";
+            resultMessage = "{\"message\":\"Successfully logged out\"}";
         } else {
             resultMessage = "{\"message\":\"Wrong authentication. Have you used the right username?\"}";
         }

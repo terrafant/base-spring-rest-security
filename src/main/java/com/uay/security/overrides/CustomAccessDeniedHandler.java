@@ -20,10 +20,9 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         response.setContentType(Versions.V1_0);
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         PrintWriter out = response.getWriter();
-        out.print("{\"message\":\"You are not privileged to request this resource.\", \"access-denied\":true,\"cause\":\"AUTHORIZATION_FAILURE\"}");
+        out.print("{\"message\":\"You are not privileged to request this resource\", \"access-denied\":true,\"cause\":\"AUTHORIZATION_FAILURE\"}");
         out.flush();
         out.close();
-
     }
 }
 

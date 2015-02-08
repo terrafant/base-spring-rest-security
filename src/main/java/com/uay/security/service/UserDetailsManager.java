@@ -1,5 +1,6 @@
 package com.uay.security.service;
 
+import com.uay.security.entity.SecurityToken;
 import com.uay.security.util.HeaderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,10 +25,10 @@ public class UserDetailsManager {
     private SessionManager sessionManager;
 
     public UserDetails loadUserDetails(HttpServletRequest request) {
-        String userName = headerUtil.getUserName(request);
+        SecurityToken securityToken = headerUtil.getSecurityToken(request);
 
-        return userName != null && sessionManager.hasLoggedIn(userName)
-                ? userDetailsService.loadUserByUsername(userName)
+        return securityToken != null && sessionManager.hasLoggedIn(securityToken)
+                ? userDetailsService.loadUserByUsername(securityToken.getUsername())
                 : null;
     }
 

@@ -33,7 +33,7 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                                         Authentication authentication) throws ServletException, IOException {
         try {
             String token = headerUtil.createAuthToken(authentication);
-            sessionManager.addSession(authentication);
+            sessionManager.addSession(token);
             ObjectMapper mapper = new ObjectMapper();
             ObjectNode node = mapper.createObjectNode();
             node.put(TOKEN_FIELD_NAME, token);

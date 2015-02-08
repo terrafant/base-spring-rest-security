@@ -14,7 +14,8 @@ public class SecurityContextService {
     public SecurityContext constructSecurityContext(UserDetails userDetails) {
         if (userDetails != null) {
             SecurityContextImpl securityContext = new SecurityContextImpl();
-            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
+            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails,
+                    userDetails.getPassword(), userDetails.getAuthorities());
             securityContext.setAuthentication(authentication);
             return securityContext;
         }
