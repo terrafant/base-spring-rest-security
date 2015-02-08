@@ -15,6 +15,10 @@ public class SessionManager {
 
     private final Set<String> loggedInUsers = new HashSet<>();
 
+    public void addSession(Authentication authentication) {
+        addSession(userDetailsManager.retrieveUsername(authentication));
+    }
+
     public void addSession(String userName) {
         loggedInUsers.add(userName);
     }
@@ -28,6 +32,6 @@ public class SessionManager {
     }
 
     public void removeSession(Authentication authentication) {
-        removeSession(userDetailsManager.getUsername(authentication));
+        removeSession(userDetailsManager.retrieveUsername(authentication));
     }
 }

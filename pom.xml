@@ -10,13 +10,19 @@
 
     <!-- Shared version number properties -->
     <properties>
-        <org.springframework.version>3.0.5.RELEASE</org.springframework.version>
+        <org.springframework.version>3.1.1.RELEASE</org.springframework.version>
         <jdk.version>1.7</jdk.version>
         <org.slf4j.version>1.7.2</org.slf4j.version>
         <org.springframework.security.version>3.1.0.RELEASE</org.springframework.security.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
         <!-- Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -27,11 +33,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>log4j-over-slf4j</artifactId>
             <version>${org.slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>2.3</version>
         </dependency>
         <!-- JSP tags -->
         <dependency>

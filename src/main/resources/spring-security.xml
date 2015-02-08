@@ -38,7 +38,12 @@
     <beans:bean id="myFailureHandler"
                 class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler"/>
 
-    <authentication-manager alias="authenticationManager">
+    <beans:bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <beans:property name="location" value="classpath:security.properties"/>
+    </beans:bean>
+
+
+    <authentication-manager alias="authenticationManager" erase-credentials="false">
         <authentication-provider>
             <user-service id="inMemoryUserDetailsService">
                 <user name="temporary" password="temporary" authorities="ROLE_ADMIN"/>

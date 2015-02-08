@@ -1,42 +1,40 @@
 package com.uay.security.util;
 
 
+import com.uay.security.service.UserDetailsManager;
+import com.uay.security.util.SecurityTokenUtil.SecurityToken;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
-import org.joda.time.Period;
-import org.joda.time.format.PeriodFormatter;
-import org.joda.time.format.PeriodFormatterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 @Component
 public class HeaderUtil {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HeaderUtil.class);
-
-    private final EncryptionUtil encryptionUtil = new EncryptionUtil();
+    private static final Logger logger = LoggerFactory.getLogger(HeaderUtil.class);
 
     private static final String HEADER_NAME = "X-Auth-Token";
+    public static final long TWO_WEEKS_MS = 1209600000;
 
-    private Period sessionMaxAge;
+    @Value("${token.ttl}")
+    private long ttl;
 
+    @Value("${token.seed}")
     private String seed;
+
+    @Autowired
+    private UserDetailsManager userDetailsManager;
 
     @PostConstruct
     private void init() {
-        String encryptionEnabled = "true";
-        if (StringUtils.isNotBlank(encryptionEnabled) && Boolean.parseBoolean(encryptionEnabled)) {
-            encryptionUtil.encryptionEnabled(true);
-            seed = "auth.encryption.seed";
-        }
-        sessionMaxAge = getSessionMaxAge();
     }
 
     public String getUserName(HttpServletRequest request) {
@@ -45,66 +43,28 @@ public class HeaderUtil {
     }
 
     private String extractUserName(String value) {
-
-        try {
-            String decryptedValue = encryptionUtil.decrypt(value, seed);
-            String[] split = decryptedValue.split("\\|");
-            String username = split[0];
-            DateTime timestamp =  new DateTime(Long.parseLong(split[1]));
-            if (timestamp.isAfter(DateTime.now().minus(sessionMaxAge))) {
-                return username;
-            }
-        } catch (IOException | GeneralSecurityException e) {
-            LOG.debug("Unable to decrypt header", e);
+        SecurityToken securityToken = SecurityTokenUtil.decodeToken(value);
+        if (!SecurityTokenUtil.isTokenExpired(securityToken.getExpirationDate())) {
+            return securityToken.getUsername();
         }
         return null;
     }
 
-    public void addHeader(HttpServletResponse response, String userName) {
+    public void addHeader(HttpServletResponse response, Authentication authentication) {
         try {
-            String encryptedValue = createAuthToken(userName);
+            String encryptedValue = createAuthToken(authentication);
             response.setHeader(HEADER_NAME, encryptedValue);
-        } catch (IOException | GeneralSecurityException e) {
-            LOG.error("Unable to encrypt header", e);
+        } catch (GeneralSecurityException e) {
+            logger.error("Unable to encrypt header", e);
         }
     }
 
-    public String createAuthToken(String userName) throws IOException, GeneralSecurityException {
-        String value = userName + "|" + System.currentTimeMillis();
-        return encryptionUtil.encrypt(value, seed);
-    }
-
-    private Period getSessionMaxAge() {
-        String maxAge = "3m";
-        PeriodFormatter format = new PeriodFormatterBuilder()
-                .appendDays()
-                .appendSuffix("d", "d")
-                .printZeroRarelyFirst()
-                .appendHours()
-                .appendSuffix("h", "h")
-                .printZeroRarelyFirst()
-                .appendMinutes()
-                .appendSuffix("m", "m")
-                .toFormatter();
-        Period sessionMaxAge = format.parsePeriod(maxAge);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Session maxAge is: "+
-                            formatIfNotZero(sessionMaxAge.getDays(), "days", "day") +
-                            formatIfNotZero(sessionMaxAge.getHours(), "hours", "hour") +
-                            formatIfNotZero(sessionMaxAge.getMinutes(), "minutes", "minute")
-            );
+    public String createAuthToken(Authentication authentication) throws GeneralSecurityException {
+        String username = userDetailsManager.retrieveUsername(authentication);
+        String password = userDetailsManager.retrievePassword(authentication);
+        if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
+            throw new GeneralSecurityException("Cannot get user credentials");
         }
-        return sessionMaxAge;
+        return SecurityTokenUtil.makeToken(username, password, System.currentTimeMillis() + ttl, seed);
     }
-
-    private static String formatIfNotZero(int value, String plural, String singleton) {
-        if (value > 0) {
-            if (value > 1) {
-                return "" + value + " " + plural;
-            }
-            return "" + value + " " + singleton;
-        }
-        return "";
-    }
-
 }

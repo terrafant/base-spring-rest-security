@@ -36,8 +36,7 @@ public class HeaderAuthenticationFilter extends GenericFilterBean {
         try {
             SecurityContextHolder.setContext(contextBeforeChainExecution);
             if (contextBeforeChainExecution.getAuthentication() != null && contextBeforeChainExecution.getAuthentication().isAuthenticated()) {
-                String userName = userDetailsManager.getUsername(contextBeforeChainExecution.getAuthentication());
-                headerUtil.addHeader((HttpServletResponse) response, userName);
+                headerUtil.addHeader((HttpServletResponse) response, contextBeforeChainExecution.getAuthentication());
             }
             filterChain.doFilter(request, response);
         }

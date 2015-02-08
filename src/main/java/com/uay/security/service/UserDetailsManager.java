@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 
 @Service
 public class UserDetailsManager {
+
     @Autowired
     @Qualifier("inMemoryUserDetailsService")
     private UserDetailsService userDetailsService;
@@ -30,10 +31,29 @@ public class UserDetailsManager {
                 : null;
     }
 
-    public String getUsername(Authentication authentication) {
-        if (authentication != null && authentication.getPrincipal() != null) {
-            return ((UserDetails)authentication.getPrincipal()).getUsername();
+    public String retrieveUsername(Authentication authentication) {
+        if (isInstanceOfUserDetails(authentication)) {
+            return ((UserDetails) authentication.getPrincipal()).getUsername();
         }
-        return null;
+        else {
+            return authentication.getPrincipal().toString();
+        }
     }
+
+    public String retrievePassword(Authentication authentication) {
+        if (isInstanceOfUserDetails(authentication)) {
+            return ((UserDetails) authentication.getPrincipal()).getPassword();
+        }
+        else {
+            if (authentication.getCredentials() == null) {
+                return null;
+            }
+            return authentication.getCredentials().toString();
+        }
+    }
+
+    private boolean isInstanceOfUserDetails(Authentication authentication) {
+        return authentication.getPrincipal() instanceof UserDetails;
+    }
+
 }
