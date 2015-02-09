@@ -13,7 +13,7 @@
 
     <context:component-scan base-package="com.uay.security"/>
 
-    <http entry-point-ref="customAuthenticationEntryPoint" >
+    <http entry-point-ref="customAuthenticationEntryPoint" access-decision-manager-ref="accessDecisionManager" >
         <custom-filter ref="headerAuthenticationFilter" before="LOGOUT_FILTER" />
         <access-denied-handler ref="customAccessDeniedHandler" />
         <intercept-url pattern="/" access="ROLE_ANONYMOUS" />
@@ -51,5 +51,26 @@
             </user-service>
         </authentication-provider>
     </authentication-manager>
+
+    <beans:bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
+        <beans:constructor-arg>
+            <beans:list>
+                <beans:ref bean="roleVoter" />
+            </beans:list>
+        </beans:constructor-arg>
+    </beans:bean>
+
+    <beans:bean id="roleVoter" class="org.springframework.security.access.vote.RoleHierarchyVoter">
+        <beans:constructor-arg>
+            <beans:bean class="org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl">
+                <beans:property name="hierarchy">
+                    <beans:value>
+                        ROLE_ADMIN > ROLE_USER
+                        ROLE_USER > ROLE_ANONYMOUS
+                    </beans:value>
+                </beans:property>
+            </beans:bean>
+        </beans:constructor-arg>
+    </beans:bean>
 
 </beans:beans>
